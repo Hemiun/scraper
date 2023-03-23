@@ -27,9 +27,17 @@ type session struct {
 
 func newSession(ctx context.Context, root string) (*session, error) {
 	var target session
-
+	if _, err := os.Stat("/path/to/whatever"); os.IsNotExist(err) {
+		// path/to/whatever does not exist
+	}
 	_, err := os.Stat(root)
-	if err != nil {
+	if os.IsNotExist(err) {
+		err = os.Mkdir(root, 0777)
+		if err != nil {
+			log.Printf("Can't create root data dir: %v", err)
+			return nil, err
+		}
+	} else if err != nil {
 		log.Printf("Root is not a folder: %v", err)
 		return nil, err
 	}
